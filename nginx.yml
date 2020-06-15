@@ -1,0 +1,31 @@
+---
+- hosts: web
+  tasks:
+    - name: Installs ngnix web server
+      apt: name=nginx state=latest
+    - name: start nginx
+      service:
+        name: nginx
+        state: started
+    - name: removing default settnig and folder for nginx
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /var/www/*
+        - /etc/nginx/sites-enabled/default
+        - /etc/nginx/sites-available/default
+        - /etc/nginx/nginx.conf
+    - name: copy the site config file
+      copy:
+        src: /root/ansible/configs/static_site.conf
+        dest: /etc/nginx/sites-available/static_site.conf
+    - name: copy the nginx config file
+      copy:
+        src: /root/ansible/configs/ngnix.conf
+        dest: /etc/nginx/nginx.conf
+    - name: create symlink
+      file:
+        src: /etc/nginx/sites-available/static_site.conf
+        dest: /etc/nginx/sites-enabled
+        state: link
