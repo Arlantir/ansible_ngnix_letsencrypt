@@ -29,3 +29,7 @@
         src: /etc/nginx/sites-available/static_site.conf
         dest: /etc/nginx/sites-enabled
         state: link
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restart
