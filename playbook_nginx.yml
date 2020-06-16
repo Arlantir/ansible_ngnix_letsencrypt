@@ -1,5 +1,6 @@
 ---
-- hosts: web
+- hosts: 127.0.0.1
+  connection: local
   tasks:
     - name: Installs ngnix web server
       apt: name=nginx state=latest
@@ -19,17 +20,21 @@
     - name: copy the site config file
       copy:
         src: /root/ansible/configs/static_site.conf
-        dest: /etc/nginx/sites-available/static_site.conf
+        dest: /etc/nginx/sites-available/{{ inventory_hostname }}.conf
     - name: copy the nginx config file
       copy:
         src: /root/ansible/configs/ngnix.conf
         dest: /etc/nginx/nginx.conf
     - name: create symlink
       file:
-        src: /etc/nginx/sites-available/static_site.conf
+        src: /etc/nginx/sites-available/{{ inventory_hostname }}.conf
         dest: /etc/nginx/sites-enabled
         state: link
+        owner: root
+        group: root
+        mode: 755
+        force: yes
     - name: restart nginx
       service:
         name: nginx
-        state: restart
+        state: restarted
