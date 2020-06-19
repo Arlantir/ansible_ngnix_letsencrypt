@@ -1,13 +1,16 @@
 ---
-- hosts: 127.0.0.1
-  connection: local
+- hosts: localhost
   tasks:
+
+    # Install and settings for nginx
     - name: Installs ngnix web server
       apt: name=nginx state=latest
+
     - name: start nginx
       service:
         name: nginx
         state: started
+
     - name: removing default settnig and folder for nginx
       file:
         path: "{{ item }}"
@@ -17,24 +20,46 @@
         - /etc/nginx/sites-enabled/default
         - /etc/nginx/sites-available/default
         - /etc/nginx/nginx.conf
+
+    - name: creates directory
+      file:
+        path: /var/www/{{ inventory_hostname }}
+        state: directory
+
     - name: copy the site config file
-      copy:
-        src: /root/ansible/configs/static_site.conf
+      template:
+        src: /root/ansible/templates/static_site.j2
         dest: /etc/nginx/sites-available/{{ inventory_hostname }}.conf
+
     - name: copy the nginx config file
       copy:
-        src: /root/ansible/configs/ngnix.conf
-        dest: /etc/nginx/nginx.conf
+        src: /root/ansible/config/nginx.conf
+        dest: /etc/nginx/
+
     - name: create symlink
       file:
-        src: /etc/nginx/sites-available/{{ inventory_hostname }}.conf
-        dest: /etc/nginx/sites-enabled
-        state: link
-        owner: root
-        group: root
-        mode: 755
-        force: yes
+        src=/etc/nginx/sites-available/{{ inventory_hostname }}.conf
+        dest=/etc/nginx/sites-enabled
+        state=link
+
     - name: restart nginx
       service:
         name: nginx
         state: restarted
+
+    # Install and settings for letsencrypt
+    - block:
+        - name: install python-dev
+          apt: name=python-dev state=latest
+
+        - name: copy the python config file
+          copy:
+            src: /root/ansible/config/acme-tiny.py
+            dest: /usr/local/bin/
+            mode: a+x
+
+        - name: copy the ssl config
+          copy:
+            src: /root/ansible/template/issue-certificate.sh.j2
+            dest: /usr/local/bin/
+            mode: a+x
