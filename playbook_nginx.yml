@@ -4,7 +4,9 @@
 
     # Install and settings for nginx
     - name: Installs ngnix web server
-      apt: name=nginx state=latest
+      apt:
+        name: nginx
+        state: latest
 
     - name: start nginx
       service:
@@ -21,9 +23,11 @@
         - /etc/nginx/sites-available/default
         - /etc/nginx/nginx.conf
 
-    - name: creates directory
+    - name: creates directory for suite
       file:
         path: /var/www/{{ host_name }}
+        owner: www-data
+        group: www-data
         state: directory
 
     - name: copy the site config file
@@ -38,9 +42,9 @@
 
     - name: create symlink
       file:
-        src=/etc/nginx/sites-available/{{ host_name }}.conf
-        dest=/etc/nginx/sites-enabled
-        state=link
+        src: /etc/nginx/sites-available/{{ host_name }}.conf
+        dest: /etc/nginx/sites-enabled
+        state: link
 
     - name: restart nginx
       service:
@@ -49,17 +53,34 @@
 
     # Install and settings for letsencrypt
     - block:
-        - name: install python-dev
-          apt: name=python-dev state=latest
+      - name: install python-dev
+        apt:
+          name: python-dev
+          state: latest
 
-        - name: copy the python config file
-          copy:
-            src: ./config/acme-tiny.py
-            dest: /usr/local/bin/
-            mode: a+x
+      - name: copy the python config file
+        copy:
+          src: ./config/acme-tiny.py
+          dest: /usr/local/bin/
+          mode: a+x
 
-        - name: copy the ssl config
-          copy:
-            src: ./template/issue-certificate.sh.j2
-            dest: /usr/local/bin/
-            mode: a+x
+      - name: copy the ssl config
+        copy:
+          src: ./template/issue-certificate.sh.j2
+          dest: /usr/local/bin/
+          mode: a+x
+
+      - name: create the Let's Encrypt / ACME challenge path
+        file:
+          path: /var/www/letsencrypt/.well-known/acme-challenge
+          state: directory
+
+      - name: restart nginx
+        service:
+          name: nginx
+          state: restarted
+
+      # Certificate Issue Launch
+      - block:
+          name: run a script
+          script: /usr/local/bin/issue-certificate.sh
