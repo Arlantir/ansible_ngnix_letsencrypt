@@ -82,5 +82,5 @@
 
     # Certificate Issue Launch
     - block:
-        name: run a script
+      - name: run a script
         script: /usr/local/bin/issue-certificate.sh
