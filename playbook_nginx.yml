@@ -80,7 +80,7 @@
           name: nginx
           state: restarted
 
-      # Certificate Issue Launch
-      - block:
-          name: run a script
-          script: /usr/local/bin/issue-certificate.sh
+    # Certificate Issue Launch
+    - block:
+        name: run a script
+        script: /usr/local/bin/issue-certificate.sh
