@@ -65,8 +65,8 @@
           mode: a+x
 
       - name: copy the ssl config
-        copy:
-          src: ./template/issue-certificate.sh.j2
+        template:
+          src: ./templates/issue-certificate.sh.j2
           dest: /usr/local/bin/
           mode: a+x
 
@@ -75,12 +75,10 @@
           path: /var/www/letsencrypt/.well-known/acme-challenge
           state: directory
 
+      - name: run a script
+        script: /usr/local/bin/issue-certificate.sh
+
       - name: restart nginx
         service:
           name: nginx
           state: restarted
-
-    # Certificate Issue Launch
-    - block:
-      - name: run a script
-        script: /usr/local/bin/issue-certificate.sh
