@@ -34,22 +34,24 @@
       template:
         src: ./templates/static_site.j2
         dest: /etc/nginx/sites-available/{{ host_name }}.conf
+      notify:
+        - restart nginx
 
     - name: copy the nginx config file
       copy:
         src: ./config/nginx.conf
         dest: /etc/nginx/
+      notify:
+        - restart nginx
 
     - name: create symlink
       file:
-        src: /etc/nginx/sites-available/{{ host_name }}.conf
-        dest: /etc/nginx/sites-enabled
+        path: /etc/nginx/sites-available/{{ host_name }}.conf
+        src: /etc/nginx/sites-enabled
         state: link
-
-    - name: restart nginx
-      service:
-        name: nginx
-        state: restarted
+        force: yes
+      notify:
+        - restart nginx
 
     # Install and settings for letsencrypt
     - block:
