@@ -25,6 +25,7 @@ ansible-playbook  playbook_nginx.yml -e "domain_name=example.com host_name=examp
 ```
 
 **domain_name** - доменное имя
+
 **host_name** - чаще всего совпадает с доменным именем, но указывается без доменной зоны
 
 [1]: https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
